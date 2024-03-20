@@ -1,0 +1,103 @@
+hive
+
+CREATE TABLE customers (customer_id INT, name STRING, email STRING) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',';
+CREATE TABLE orders (order_id INT, customer_id INT, order_date STRING, total_amount DOUBLE) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',';
+CREATE TABLE products (product_id INT, name STRING, price DOUBLE) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',';
+CREATE TABLE order_details (order_id INT, product_id INT, quantity INT) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',';
+
+LOAD DATA INPATH '/customers.csv' INTO TABLE customers;
+LOAD DATA INPATH '/orders.csv' INTO TABLE orders;
+LOAD DATA INPATH '/products.csv' INTO TABLE products;
+LOAD DATA INPATH '/order_details.csv' INTO TABLE order_details;
+
+1. Получить список всех заказов клиента по его customer_id.
+
+SELECT o.order_id, o.order_date, o.total_amount
+FROM orders o
+JOIN customers c ON o.customer_id = c.customer_id
+WHERE c.customer_id = 1;
+
+2. Получить общую сумму, потраченную клиентом на заказы
+
+SELECT c.customer_id, SUM(o.total_amount) AS total_spent
+FROM orders o
+JOIN customers c ON o.customer_id = c.customer_id
+GROUP BY c.customer_id;
+
+3. Найти всех клиентов, которые ничего не заказывали
+
+SELECT c.*
+FROM customers c
+LEFT JOIN orders o ON c.customer_id = o.customer_id
+WHERE o.order_id IS NULL;
+
+4. Получить детали заказа (товары, количество и цена за единицу) по order_id
+
+SELECT o.order_id, p.name, od.quantity, p.price
+FROM order_details od
+JOIN orders o ON od.order_id = o.order_id
+JOIN products p ON od.product_id = p.product_id
+WHERE o.order_id = 1; -- Пример для заказа с ID 1
+
+5. Получить список товаров, которые были заказаны более чем одним клиентом
+
+SELECT p.product_id, p.name, COUNT(DISTINCT o.customer_id) AS customer_count
+FROM order_details od
+JOIN orders o ON od.order_id = o.order_id
+JOIN products p ON od.product_id = p.product_id
+GROUP BY p.product_id, p.name
+HAVING COUNT(DISTINCT o.customer_id) > 1;
+
+
+pig
+
+customers = LOAD '/customers.csv' USING PigStorage(',') AS (customer_id: int, name: chararray, email: chararray);
+orders = LOAD '/orders.csv' USING PigStorage(',') AS (order_id: int, customer_id: int, order_date: chararray, total_amount: double);
+products = LOAD '/products.csv' USING PigStorage(',') AS (product_id: int, name: chararray, price: double);
+order_details = LOAD '/order_details.csv' USING PigStorage(',') AS (order_id: int, product_id: int, quantity: int);
+
+1.Получить список всех заказов клиента по его customer_id.
+
+cust_orders = JOIN orders BY customer_id, customers BY customer_id;
+cust_orders_filtered = FILTER cust_orders BY customers::customer_id == 1;
+DUMP cust_orders_filtered;
+
+2. Получить общую сумму, потраченную клиентом на заказы
+
+orders_grouped = GROUP orders BY customer_id;
+total_spent_by_customer = FOREACH orders_grouped GENERATE group AS customer_id, SUM(orders.total_amount) AS total_spent;
+DUMP total_spent_by_customer;
+
+3. Найти всех клиентов, которые ничего не заказывали
+
+customer_orders = JOIN customers BY customer_id LEFT, orders BY customer_id;
+customers_without_orders = FILTER customer_orders BY orders::order_id IS NULL;
+DUMP customers_without_orders;
+
+4. Получить детали заказа (товары, количество и цена за единицу) по order_id
+
+order_details_joined = JOIN order_details BY order_id, orders BY order_id, products BY product_id;
+order_details_filtered = FILTER order_details_joined BY orders::order_id == 1; -- Пример для заказа с ID 1
+DUMP order_details_filtered;
+
+5. Получить список товаров, которые были заказаны более чем одним клиентом
+
+orders_products = JOIN order_details BY product_id, orders BY order_id;
+grouped_by_product = GROUP orders_products BY order_details::product_id;
+product_customer_count = FOREACH grouped_by_product GENERATE group AS product_id, COUNT(DISTINCT orders_products::orders::customer_id) AS customer_count;
+products_ordered_by_multiple_customers = FILTER product_customer_count BY customer_count > 1;
+DUMP products_ordered_by_multiple_customers;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
