@@ -116,7 +116,6 @@ def map_order_details(orders_file, order_details_file, products_file, target_ord
             for product_id, quantity in order_products]
 
 # Функция reduce не требуется, так как агрегация не выполняется
-
 def get_order_details(orders_file, order_details_file, products_file, order_id):
     # Вызов функции map для получения деталей заказа по order_id
     order_details = map_order_details(orders_file, order_details_file, products_file, str(order_id))
@@ -174,19 +173,19 @@ for customer_id in orders_by_customer:
             print('First test: ', order)
 
 # Предполагая, что файл orders.csv находится в том же каталоге
-file_name = '/home/osboxes/mysources/lab3/orders.csv'  # Укажите путь к файлу orders.csv
+file_name = '/home/osboxes/mysources/lab3/orders.csv'  
 total_spent = map_reduce_total_spent(file_name)
 print('Second test: ', total_spent)
 
-customers_file = '/home/osboxes/mysources/lab3/customers.csv'  # Укажите путь к файлу customers.csv
-orders_file = '/home/osboxes/mysources/lab3/orders.csv'  # Укажите путь к файлу orders.csv
+customers_file = '/home/osboxes/mysources/lab3/customers.csv'  
+orders_file = '/home/osboxes/mysources/lab3/orders.csv'  
 
 customers_without_orders = map_reduce_customers_without_orders(customers_file, orders_file)
 print('Third test: ', customers_without_orders)
 
-orders_file = '/home/osboxes/mysources/lab3/orders.csv'  # Укажите путь к файлу orders.csv
-order_details_file = '/home/osboxes/mysources/lab3/order_details.csv'  # Укажите путь к файлу order_details.csv
-products_file = '/home/osboxes/mysources/lab3/products.csv'  # Укажите путь к файлу products.csv
+orders_file = '/home/osboxes/mysources/lab3/orders.csv'  
+order_details_file = '/home/osboxes/mysources/lab3/order_details.csv'  
+products_file = '/home/osboxes/mysources/lab3/products.csv'  
 target_order_id = 1  # Целевой ID заказа
 
 # Получение и вывод деталей заказа
@@ -195,9 +194,9 @@ for detail in order_details:
     print('Forth test: ', detail)
 
 # Пути к файлам
-orders_file = '/home/osboxes/mysources/lab3/orders.csv'  # Укажите путь к файлу orders.csv
-order_details_file = '/home/osboxes/mysources/lab3/order_details.csv'  # Укажите путь к файлу order_details.csv
-products_file = '/home/osboxes/mysources/lab3/products.csv'  # Укажите путь к файлу products.csv
+orders_file = '/home/osboxes/mysources/lab3/orders.csv'  
+order_details_file = '/home/osboxes/mysources/lab3/order_details.csv' 
+products_file = '/home/osboxes/mysources/lab3/products.csv'  
 
 products_ordered_by_multiple_customers = map_reduce_products_multiple_customers(orders_file, order_details_file, products_file)
 print('Fifth test: ', products_ordered_by_multiple_customers)
